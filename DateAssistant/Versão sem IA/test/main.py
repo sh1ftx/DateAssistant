@@ -3,8 +3,6 @@ from datetime import date, timedelta
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
-import requests
-import json
 
 console = Console()
 
@@ -50,7 +48,7 @@ def listar_feriados(ano):
     return feriados
 
 def exibir_calendario(ano, mes=None):
-    """Exibe o calendário com feriados e responde dúvidas sobre datas via chatbot."""
+    """Exibe o calendário com feriados, mês a mês, com legenda dos feriados."""
     feriados = listar_feriados(ano)
     cal = calendar.Calendar()
     meses = [mes] if mes else range(1, 13)
@@ -88,44 +86,10 @@ def exibir_calendario(ano, mes=None):
             for feriado in legenda_feriados:
                 console.print(f"[red]- {feriado}[/]")
         console.print("\n")
-
+    
     # Exibe a legenda geral
     console.print("\n[bold underline]Legenda Geral:[/]")
     console.print("[red]Vermelho:[/] Feriados")
-
-def responder_duvida(data_perguntada):
-    """Função que consulta o modelo de IA para responder a dúvidas sobre datas."""
-    prompt = f"O que aconteceu no dia {data_perguntada}?"
-    
-    url = "http://127.0.0.1:5000"  # URL do modelo Ollama rodando localmente
-    headers = {"Content-Type": "application/json"}
-    payload = {
-        "model": "zephyr",  # Ou qualquer modelo que você escolher
-        "input": prompt
-    }
-    
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-    
-    if response.status_code == 200:
-        resposta = response.json()
-        return resposta["output"]
-    else:
-        return "Desculpe, não pude encontrar informações para esta data."
-
-def interagir_com_chatbot():
-    """Função para interagir com o chatbot no terminal."""
-    while True:
-        pergunta = input("Pergunte ao chatbot sobre uma data (exemplo: 'O que aconteceu no dia 25/12?') ou digite 'sair' para encerrar: ")
-        if pergunta.lower() == 'sair':
-            break
-        # Extrai a data da pergunta
-        # Aqui vamos assumir que a pergunta sempre contém uma data no formato DD/MM
-        try:
-            data_perguntada = pergunta.split('dia ')[1].split('?')[0]
-            resposta = responder_duvida(data_perguntada)
-            print(f"Resposta: {resposta}")
-        except Exception as e:
-            print(f"Não consegui entender a data, tente novamente. Erro: {str(e)}")
 
 # Entrada do usuário
 ano = int(input('Digite o ano em formato YYYY: '))
@@ -136,6 +100,3 @@ if filtrar_mes.upper() == 'S':
     exibir_calendario(ano, mes)
 else:
     exibir_calendario(ano)
-
-# Chama o chatbot para responder perguntas
-interagir_com_chatbot()
